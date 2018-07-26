@@ -41,26 +41,45 @@ public class MainActivity extends AppCompatActivity {
 
         final ArrayList<ChatData> singModles = new ArrayList<>();
 
-        RecycleAdapter adapter = new RecycleAdapter(MainActivity.this, R.layout.recycler_item, singModles);
+        final RecycleAdapter adapter = new RecycleAdapter(MainActivity.this, R.layout.recycler_item, singModles);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
-
-
+//        singModles.add(new ChatData(ChatData.YOUR_TYPE,R.layout.recycler_item));
+//        singModles.add(new ChatData(ChatData.MY_TYPE,R.layout.recycler_my_item));
         databaseReference = firebaseDatabase.getReference().child("message");
 
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChatData chatData = new ChatData(USER_NAME, chat_message.getText().toString());  // 유저 이름과 메세지로 chatData 만들기
+//                ChatData chatData = new ChatData(USER_NAME, chat_message.getText().toString());  // 유저 이름과 메세지로 chatData 만들기
+                ChatData chatData = new ChatData();
+                chatData.setUsername(USER_NAME);
+                chatData.setMymessage(chat_message.getText().toString());
+
                 databaseReference.push().setValue(chatData);  // 기본 database 하위 message라는 child에 chatData를 list로 만들기
-                chat_message.setText(" ");
+                chat_message.setText("");
             }
         });
+
+
         databaseReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 ChatData chatData = dataSnapshot.getValue(ChatData.class);
+                Log.d("addChildEventListener", chatData.getUsername());
                 singModles.add(chatData);
+                adapter.notifyDataSetChanged();
+                if(chatData.getUsername().equals(USER_NAME)){
+                    chatData.setType(1);
+                    chatData.setMessage(chatData.getMymessage());
+
+                }else{
+                    chatData.setType(0);
+                    chatData.setMessage(chatData.getMymessage());
+                }
+                recyclerView.scrollToPosition(adapter.getItemCount()-1);
+
+
 
             }
 

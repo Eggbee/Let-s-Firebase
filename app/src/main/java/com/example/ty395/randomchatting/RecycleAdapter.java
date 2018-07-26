@@ -11,48 +11,83 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.ViewHolder> {
+public class RecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
     Context context;
     ArrayList<ChatData> singModel;
     int recycler_item;
+
+
     public RecycleAdapter(Context context, int recycler_item, ArrayList<ChatData> singModels) {
         this.context = context;
         this.singModel = singModels;
         this.recycler_item=recycler_item;
     }
 
+    @Override
+    public int getItemCount() {
+        return singModel.size() ;
+    }
+
+    public int getItemViewType(int position) {
+
+        switch (singModel.get(position).type) {
+            case 0:
+                return ChatData.YOUR_TYPE;
+            case 1:
+                return ChatData.MY_TYPE;
+             default:
+                return -1;
+        }
+    }
 
     @NonNull
     @Override
-    public RecycleAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.recycler_item,parent,false);
-        return new ViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == 0) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_item, parent, false);
+            return new ViewHolder1(v);
+        } else {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_my_item , parent, false);
+            return new ViewHolder2(v);
+        }
+
     }
 
+
     @Override
-    public void onBindViewHolder(@NonNull RecycleAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ChatData chatData = singModel.get(position);
-        holder.username.setText(chatData.getUsername());
-        holder.message.setText(chatData.getMessage());
-
+        if(chatData != null){
+            switch (chatData.type) {
+                case ChatData.YOUR_TYPE:
+                    ((ViewHolder1) holder).message.setText(chatData.message);
+                    ((ViewHolder1) holder).username.setText(chatData.username);
+                    break;
+                 case ChatData.MY_TYPE:
+                     ((ViewHolder2) holder).mymessage.setText(chatData.mymessage);
+            }
+        }
     }
 
-    @Override
-    public int getItemCount() {
-        Log.d("getItemCount", singModel.size()+"");
-        return singModel.size();
-    }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder1 extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public TextView username, message;
 
-        public ViewHolder(View itemView) {
+        public ViewHolder1(View itemView) {
             super(itemView);
             username = (TextView) itemView.findViewById(R.id.username);
             message = (TextView) itemView.findViewById(R.id.message);
         }
     }
+    public static class ViewHolder2 extends RecyclerView.ViewHolder {
+        // each data item is just a string in this case
+        public TextView mymessage;
 
-
+        public ViewHolder2(View itemView) {
+            super(itemView);
+            mymessage = (TextView) itemView.findViewById(R.id.mymessage);
+        }
+    }
 }
