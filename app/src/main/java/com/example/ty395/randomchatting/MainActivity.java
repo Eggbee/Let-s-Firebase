@@ -22,10 +22,11 @@ public class MainActivity extends AppCompatActivity {
     String USER_NAME;
     RecyclerView recyclerView;
     ImageButton send;
+    ImageButton image;
     EditText chat_message;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    DatabaseReference databaseReference = firebaseDatabase.getReference();
-    RecycleAdapter adapter;
+    DatabaseReference databaseReference;
+    String room_key;
 
 
     @Override
@@ -36,9 +37,14 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.list);
         send = (ImageButton) findViewById(R.id.send);
         chat_message = (EditText) findViewById(R.id.chat_message);
+
         Intent intent = getIntent();
         USER_NAME = intent.getStringExtra("username");
+        room_key=intent.getStringExtra("roomkey");
 
+        databaseReference = firebaseDatabase.getReference("message").child(room_key);
+
+        image=(ImageButton)findViewById(R.id.image);
         final ArrayList<ChatData> singModles = new ArrayList<>();
 
         final RecycleAdapter adapter = new RecycleAdapter(MainActivity.this, R.layout.recycler_item, singModles);
@@ -46,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 //        singModles.add(new ChatData(ChatData.YOUR_TYPE,R.layout.recycler_item));
 //        singModles.add(new ChatData(ChatData.MY_TYPE,R.layout.recycler_my_item));
-        databaseReference = firebaseDatabase.getReference().child("message");
 
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
                 ChatData chatData = new ChatData();
                 chatData.setUsername(USER_NAME);
                 chatData.setMymessage(chat_message.getText().toString());
-
                 databaseReference.push().setValue(chatData);  // 기본 database 하위 message라는 child에 chatData를 list로 만들기
                 chat_message.setText("");
             }
@@ -67,19 +71,18 @@ public class MainActivity extends AppCompatActivity {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 ChatData chatData = dataSnapshot.getValue(ChatData.class);
                 Log.d("addChildEventListener", chatData.getUsername());
+
                 singModles.add(chatData);
                 adapter.notifyDataSetChanged();
                 if(chatData.getUsername().equals(USER_NAME)){
-                    chatData.setType(1);
+                    chatData.setType(ChatData.MY_TYPE);
                     chatData.setMessage(chatData.getMymessage());
 
                 }else{
-                    chatData.setType(0);
+                    chatData.setType(ChatData.YOUR_TYPE);
                     chatData.setMessage(chatData.getMymessage());
                 }
                 recyclerView.scrollToPosition(adapter.getItemCount()-1);
-
-
 
             }
 
@@ -90,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
             }
 
             @Override

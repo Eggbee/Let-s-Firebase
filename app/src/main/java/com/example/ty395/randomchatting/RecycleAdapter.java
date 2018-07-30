@@ -44,7 +44,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == 0) {
+        if (viewType == ChatData.YOUR_TYPE) {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_item, parent, false);
             return new ViewHolder1(v);
         } else {
