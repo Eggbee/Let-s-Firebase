@@ -3,4 +3,4 @@
 - RandomChatiing 어플리케이션 구현 코드
  - Front_end(android studio(java))
  - Back_end(Firebase)
- - Design(XD,illustrator
+ - Design(XD,illustrator)
