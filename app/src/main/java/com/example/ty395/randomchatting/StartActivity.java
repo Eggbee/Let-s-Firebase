@@ -36,6 +36,8 @@ public class StartActivity extends AppCompatActivity {
     String sub_key;
 
     String room_key;
+
+    int count,max_count;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -135,23 +137,26 @@ public class StartActivity extends AppCompatActivity {
                         ChatData chatData=new ChatData();
                         chatData.setCount(1);
                         chatData.setMax_count(2);
+                        count=chatData.getCount();
+                        max_count=chatData.getMax_count();
                         chatData.setUsername(username.getText().toString());
                         room_key = Settings.Secure.getString(StartActivity.this.getContentResolver(), Settings.Secure.ANDROID_ID);
-
                         databaseReference = firebaseDatabase.getReference("message").child(room_key);
                         databaseReference.push().setValue(chatData);
                     }else{
                         //이미 있는 방에 들어가는 경우, count를 2로 변경
                         Map<String, Object> childUpdates = new HashMap<>();
                         childUpdates.put("/" + main_key+"/"+sub_key+"/count", 2);
-
                         databaseReference.updateChildren(childUpdates);
-
+                        count=2;
+                        max_count=2;
                     }
 
                     Intent intent = new Intent(StartActivity.this, MainActivity.class);
                     intent.putExtra("username", username.getText().toString());
                     intent.putExtra("roomkey",room_key);
+                    intent.putExtra("count",count);
+                    intent.putExtra("max_count",max_count);
                     startActivity(intent);
 
                 }

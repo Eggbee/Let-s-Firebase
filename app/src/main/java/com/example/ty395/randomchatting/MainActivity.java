@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     DatabaseReference databaseReference;
     String room_key;
-
+    int count,max_count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         USER_NAME = intent.getStringExtra("username");
         room_key=intent.getStringExtra("roomkey");
+        count=intent.getIntExtra("count",0);
+        max_count=intent.getIntExtra("max_count",2);
 
         databaseReference = firebaseDatabase.getReference("message").child(room_key);
 
@@ -60,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
                 ChatData chatData = new ChatData();
                 chatData.setUsername(USER_NAME);
                 chatData.setMymessage(chat_message.getText().toString());
+                chatData.setCount(count);
+                chatData.setMax_count(max_count);
                 databaseReference.push().setValue(chatData);  // 기본 database 하위 message라는 child에 chatData를 list로 만들기
                 chat_message.setText("");
             }
@@ -71,6 +75,9 @@ public class MainActivity extends AppCompatActivity {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 ChatData chatData = dataSnapshot.getValue(ChatData.class);
                 Log.d("addChildEventListener", chatData.getUsername());
+
+                count=chatData.getCount();
+                max_count=chatData.getMax_count();
 
                 singModles.add(chatData);
                 adapter.notifyDataSetChanged();
