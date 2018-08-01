@@ -21,8 +21,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
-            android:windowSoftInputMode="adjustUnspecified" />
+            android:name=".MainActivity" />
     </application>
 
 </manifest>
