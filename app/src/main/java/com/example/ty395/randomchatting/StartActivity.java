@@ -8,7 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
@@ -19,11 +19,8 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class StartActivity extends AppCompatActivity {
     EditText username;
@@ -32,12 +29,12 @@ public class StartActivity extends AppCompatActivity {
     DatabaseReference databaseReference;
     boolean check=false;
 
-    String main_key;
-    String sub_key;
-
     String room_key;
 
     int count,max_count;
+
+    DataSnapshot mDataSnapshot;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,67 +43,110 @@ public class StartActivity extends AppCompatActivity {
         username=(EditText)findViewById(R.id.username);
         button=(Button)findViewById(R.id.button);
         final ArrayList<ChatData> singModle = new ArrayList<>();
-        databaseReference = firebaseDatabase.getReference("message");
 
+        init();
 
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String getnEdit = username.getText().toString();
+                getnEdit=getnEdit.trim();
 
+                if(getnEdit.getBytes().length<=0) {
+                    Toast.makeText(getApplicationContext(), "닉네임을 입력해주세요", Toast.LENGTH_SHORT).show();
+                }
+                else{
+
+                    if(check == false){ //새로운 방을 만드는 경우
+                        RoomData roomData = new RoomData();
+                        roomData.setCount(RoomData.ROOM_COUNT);
+                        roomData.setMax_count(RoomData.ROOM_MAX_COUNT);
+
+                        count = roomData.getCount();
+                        max_count=roomData.getMax_count();
+
+                        room_key = Settings.Secure.getString(StartActivity.this.getContentResolver(), Settings.Secure.ANDROID_ID);
+                        room_key=room_key+new Random().nextInt(1524852);
+
+                        databaseReference = firebaseDatabase.getReference(room_key);
+
+                        databaseReference.setValue(roomData);
+
+                    }else{
+                        //이미 있는 방에 들어가는 경우, count를 2로 변경
+                        Map<String, Object> childUpdates = new HashMap<>();
+                        childUpdates.put("/" + room_key+"/count", RoomData.ROOM_MAX_COUNT);
+
+                        databaseReference.updateChildren(childUpdates);
+
+                    }
+
+                    Intent intent = new Intent(StartActivity.this, MainActivity.class);
+                    intent.putExtra("username", username.getText().toString().trim());
+                    intent.putExtra("roomkey",room_key);
+                    startActivity(intent);
+
+                }
+            }
+        });
+
+    }
+
+    private void init(){
+        databaseReference = firebaseDatabase.getReference();
         databaseReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d("snapshot",dataSnapshot.getKey());
-                main_key=dataSnapshot.getKey();
+                Log.d("string",s+"");
+
+                if(dataSnapshot.getChildrenCount() > 0){
+                    RoomData roomData = dataSnapshot.getValue(RoomData.class);
+
+                    Log.d("snapshot",dataSnapshot.getValue().toString());
+                    Log.d("snapshot",dataSnapshot.getKey());
 
 
-                for(DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    Log.d("snapshot",snapshot.getValue().toString());
-                    Log.d("snapshot",snapshot.getKey());
-
-                    ChatData chatdata = snapshot.getValue(ChatData.class);
-                    Log.d("snapshot", chatdata.getCount()+"");
-
-                    if(chatdata.getCount()==1){
-                        sub_key=snapshot.getKey();
-                        Log.d("snapshot2", sub_key+"");
-
-                    }
-
-                    if(chatdata.getCount()>chatdata.getMax_count()){
+                    if(roomData.getCount()>=roomData.getMax_count()){
                         //방생성
-                        room_key = Settings.Secure.getString(StartActivity.this.getContentResolver(), Settings.Secure.ANDROID_ID);
-
+//                        room_key = Settings.Secure.getString(StartActivity.this.getContentResolver(), Settings.Secure.ANDROID_ID);
+//                        room_key=room_key+new Random().nextInt(1524852);
+                        check=false; //방이 없어서 생성하는 경우
                     }
                     else{
-                        room_key=dataSnapshot.getKey();
-                        check=true;
+                        room_key = dataSnapshot.getKey();
+                        check=true; //이미 방이 있는 경우
                     }
-                }
 
-                /*
-                if(chatdata.getCount()< chatdata.getMax_count()){
+                }else{
+
                     //방생성
-                    room_key = Settings.Secure.getString(StartActivity.this.getContentResolver(), Settings.Secure.ANDROID_ID);
-                    Log.d("getKey2", childDataSnapshot.getKey());
-                    Log.d("Max_count",chatdata.getMax_count()+"");
-                    Log.d("Max_count",chatdata.getCount()+"");
-
+                    check=false; //방이 없어서 생성하는 경우
 
                 }
-                else{
-                    room_key=dataSnapshot.getKey();
-                    check=true;
 
-                }
-                */
 
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                mDataSnapshot=dataSnapshot;
+                RoomData roomData = dataSnapshot.getValue(RoomData.class);
+                Log.d("change",dataSnapshot.getValue().toString());
+                if(roomData.getCount() >= roomData.max_count){
+                    onChildAdded(dataSnapshot, s);
 
+                }
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Log.d("remove",dataSnapshot.getValue().toString());
+                Log.d("remove",dataSnapshot.getKey());
+
+                if (room_key.equals(dataSnapshot.getKey())){
+                    room_key="";
+                    databaseReference = null;
+                }
 
             }
 
@@ -120,48 +160,12 @@ public class StartActivity extends AppCompatActivity {
 
             }
         });
+    }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String getnEdit=username.getText().toString();
-                getnEdit=getnEdit.trim();
-
-                if(getnEdit.getBytes().length<=0) {
-                    Toast.makeText(getApplicationContext(), "닉네임을 입력해주세요", Toast.LENGTH_SHORT).show();
-                }
-                else{
-
-                    if(! check){ //새로운 방을 만드는 경우
-                        ChatData chatData=new ChatData();
-                        chatData.setCount(1);
-                        chatData.setMax_count(2);
-                        count=chatData.getCount();
-                        max_count=chatData.getMax_count();
-                        chatData.setUsername(username.getText().toString());
-                        room_key = Settings.Secure.getString(StartActivity.this.getContentResolver(), Settings.Secure.ANDROID_ID);
-                        databaseReference = firebaseDatabase.getReference("message").child(room_key);
-                        databaseReference.push().setValue(chatData);
-                    }else{
-                        //이미 있는 방에 들어가는 경우, count를 2로 변경
-                        Map<String, Object> childUpdates = new HashMap<>();
-                        childUpdates.put("/" + main_key+"/"+sub_key+"/count", 2);
-                        databaseReference.updateChildren(childUpdates);
-                        count=2;
-                        max_count=2;
-                    }
-
-                    Intent intent = new Intent(StartActivity.this, MainActivity.class);
-                    intent.putExtra("username", username.getText().toString());
-                    intent.putExtra("roomkey",room_key);
-                    intent.putExtra("count",count);
-                    intent.putExtra("max_count",max_count);
-                    startActivity(intent);
-
-                }
-            }
-        });
-
+        init();
     }
 }

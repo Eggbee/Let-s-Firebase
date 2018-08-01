@@ -8,8 +8,7 @@ public class ChatData {
     String message;
     String mymessage;
     int userid;
-    int count;
-    int max_count;
+
     public ChatData() {}
 
     public ChatData(String username,String message,String mymessage,int type,int userid,int count,int max_count){
@@ -18,8 +17,7 @@ public class ChatData {
         this.mymessage=mymessage;
         this.type=type;
         this.userid=userid;
-        this.count=count;
-        this.max_count=max_count;
+
     }
 
     public void setMessage(String message) {
@@ -46,22 +44,6 @@ public class ChatData {
     public int getType() { return type; }
 
     public void setType(int type) { this.type = type; }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public int getMax_count() {
-        return max_count;
-    }
-
-    public void setMax_count(int max_count) {
-        this.max_count = max_count;
-    }
 
     public void setUserid(int userid) { this.userid = userid; }
 
