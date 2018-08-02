@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     String USER_NAME;
     RecyclerView recyclerView;
     ImageButton send;
-    ImageButton image;
+    ImageButton dialog;
     EditText chat_message;
 
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
                 databaseReference = firebaseDatabase.getReference(room_key);
                 Log.d("main",room_key);
 
-                image=(ImageButton)findViewById(R.id.image);
+                dialog=(ImageButton)findViewById(R.id.image);
                 final ArrayList<ChatData> singModles = new ArrayList<>();
 
                 final RecycleAdapter adapter = new RecycleAdapter(MainActivity.this, R.layout.recycler_item, singModles);
@@ -73,6 +73,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        dialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CustomDialog customDialog = new CustomDialog(MainActivity.this);
+
+                // 커스텀 다이얼로그를 호출한다.
+                // 커스텀 다이얼로그의 결과를 출력할 TextView를 매개변수로 같이 넘겨준다.
+                customDialog.CallFuntion();
+            }
+        });
 
         databaseReference.addChildEventListener(new ChildEventListener() {
             @Override
