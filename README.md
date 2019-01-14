@@ -1,7 +1,12 @@
-# DSM JUMPUP-CAMP
-## 랜덤채팅 어플리케이션 
-* 여름방학 보충수업 DSM JUMPUP-CAMP
-* RandomChatiing 어플리케이션 구현 코드
-* Front_end(android studio(java))
-* Back_end(Firebase)
-* Design(XD,illustrator)
+# RandomChatting
+* Jumpup Camp 제작물
+
+## skill
+
+* Front: Java(Android Studio)
+
+* Server: Firebase
+
+## conception
+
+![default](https://user-images.githubusercontent.com/26649912/51100469-98e67580-1819-11e9-9bff-b23fd0bd41d9.PNG)
