@@ -1,5 +1,6 @@
 # RandomChatting
 * Jumpup Camp 제작물
+* 다양한 상대와 대화를 나누어 볼 수 있는 
 
 ## skill
 
