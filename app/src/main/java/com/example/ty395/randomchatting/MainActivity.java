@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         String room_key;
-
+        final String token;
         //viewc초기화
         recyclerView = (RecyclerView) findViewById(R.id.list);
         send = (ImageButton) findViewById(R.id.send);
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         USER_NAME = intent.getStringExtra("username");
         room_key=intent.getStringExtra("roomkey");
-
+        token=intent.getStringExtra("token");
                 //해당 방번호의 DB목록 가져오기(없으면 해당 방을 방번호로 생성)
                 databaseReference = firebaseDatabase.getReference(room_key);
                 Log.d("main",room_key);
@@ -66,7 +66,8 @@ public class MainActivity extends AppCompatActivity {
 //                ChatData chatData = new ChatData(USER_NAME, chat_message.getText().toString());  // 유저 이름과 메세지로 chatData 만들기
                         ChatData chatData = new ChatData();
                         chatData.setUsername(USER_NAME);
-                chatData.setMymessage(chat_message.getText().toString());
+                        chatData.setToken(token);
+                        chatData.setMymessage(chat_message.getText().toString());
 
                 databaseReference.push().setValue(chatData);  // 기본 database 하위 message라는 child에 chatData를 list로 만들기
                 chat_message.setText("");

@@ -87,6 +87,7 @@ public class StartActivity extends AppCompatActivity {
                     intent.putExtra("token",token);
                     startActivity(intent);
                     Toast.makeText(getApplicationContext(),token,Toast.LENGTH_SHORT).show();
+                    Log.d("Debug","토큰토큰토큰토큰   "+token);
                 }
             }
         });
