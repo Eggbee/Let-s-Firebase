@@ -16,6 +16,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,13 +29,12 @@ public class StartActivity extends AppCompatActivity {
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     DatabaseReference databaseReference;
     boolean check=false;
-
     String room_key;
 
     int count,max_count;
 
     DataSnapshot mDataSnapshot;
-
+    String token;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +43,7 @@ public class StartActivity extends AppCompatActivity {
         username=(EditText)findViewById(R.id.username);
         button=(Button)findViewById(R.id.button);
         final ArrayList<ChatData> singModle = new ArrayList<>();
-
+        token=FirebaseInstanceId.getInstance().getToken();
         init();
 
         button.setOnClickListener(new View.OnClickListener() {
@@ -84,8 +84,9 @@ public class StartActivity extends AppCompatActivity {
                     Intent intent = new Intent(StartActivity.this, MainActivity.class);
                     intent.putExtra("username", username.getText().toString().trim());
                     intent.putExtra("roomkey",room_key);
+                    intent.putExtra("token",token);
                     startActivity(intent);
-
+                    Toast.makeText(getApplicationContext(),token,Toast.LENGTH_SHORT).show();
                 }
             }
         });

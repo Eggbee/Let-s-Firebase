@@ -9,8 +9,7 @@ public class RoomData {
     int max_count;
     public RoomData() {}
 
-    public RoomData(String username, String message, String mymessage, int type, int userid, int count, int max_count){
-
+    public RoomData(int type, int userid, int count, int max_count){
         this.count=count;
         this.max_count=max_count;
     }
