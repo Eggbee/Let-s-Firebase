@@ -1,6 +1,8 @@
 package com.example.ty395.randomchatting;
 
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,7 +19,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONObject;
+
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,8 +36,11 @@ public class MainActivity extends AppCompatActivity {
     ImageButton dialog;
     EditText chat_message;
 
-    FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    FirebaseDatabase firebaseDatabase=FirebaseDatabase.getInstance();
     DatabaseReference databaseReference;
+
+    private static final String FCM_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
+    private static final String SERVER_KEY = "AAAA2v4VeaE:APA91bH2bZrDbifDhaFSteIZMjWn98-YNsCVxcZRaOPjkPEHOR8F0FEUIB_djdbiI9xlk94nOaM_NWRi9GmXsNsPUIG0S4SBxiqEBMQRnO9Ro7PZ4UbbfO2SbYgYcMakcEOOSuqAor_VAd9_98bgdh2UwctmhQv3xQ";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
                         chatData.setUsername(USER_NAME);
                         chatData.setToken(token);
                         chatData.setMymessage(chat_message.getText().toString());
-
-                databaseReference.push().setValue(chatData);  // 기본 database 하위 message라는 child에 chatData를 list로 만들기
+                databaseReference.push().setValue(chatData);
+                sendPostToFCM(chatData);// 기본 database 하위 message라는 child에 chatData를 list로 만들기
                 chat_message.setText("");
             }
         });
@@ -137,6 +148,53 @@ public class MainActivity extends AppCompatActivity {
         super.onBackPressed();
         databaseReference.removeValue();
     }
+    private void sendPostToFCM(final ChatData chatData) {
+        firebaseDatabase.getReference("users")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        final ChatData chatData1 = dataSnapshot.getValue(ChatData.class);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Toast.makeText(getApplicationContext(),"fcm",Toast.LENGTH_SHORT).show();
+                                    // FMC 메시지 생성 start
+                                    JSONObject root = new JSONObject();
+                                    JSONObject notification = new JSONObject();
+                                    notification.put("message",chatData1.getMessage());
+                                    notification.put("title", getString(R.string.app_name));
+                                    root.put("notification", notification);
+                                    root.put("to", chatData1.getToken());
+                                    // FMC 메시지 생성 end
+
+                                    URL Url = new URL(FCM_MESSAGE_URL);
+                                    HttpURLConnection conn = (HttpURLConnection) Url.openConnection();
+                                    conn.setRequestMethod("POST");
+                                    conn.setDoOutput(true);
+                                    conn.setDoInput(true);
+                                    conn.addRequestProperty("Authorization", "key=" + SERVER_KEY);
+                                    conn.setRequestProperty("Accept", "application/json");
+                                    conn.setRequestProperty("Content-type", "application/json");
+                                    OutputStream os = conn.getOutputStream();
+                                    os.write(root.toString().getBytes("utf-8"));
+                                    os.flush();
+                                    conn.getResponseCode();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).start();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
+
 
 
 }
