@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     ImageButton send;
     ImageButton dialog;
     EditText chat_message;
-
+    String anothertoken;
     FirebaseDatabase firebaseDatabase=FirebaseDatabase.getInstance();
     DatabaseReference databaseReference;
 
@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.list);
         send = (ImageButton) findViewById(R.id.send);
         chat_message = (EditText) findViewById(R.id.chat_message);
-
         //이전 액티비티에서 userName과 방번호 가져오기
         Intent intent = getIntent();
         USER_NAME = intent.getStringExtra("username");
@@ -80,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
                         chatData.setToken(token);
                         chatData.setMymessage(chat_message.getText().toString());
                 databaseReference.push().setValue(chatData);
-                sendPostToFCM(chatData);// 기본 database 하위 message라는 child에 chatData를 list로 만들기
+                SendFcmMessage(chatData.getMessage(),chatData.getToken());// 기본 database 하위 message라는 child에 chatData를 list로 만들기
                 chat_message.setText("");
             }
         });
@@ -148,50 +147,39 @@ public class MainActivity extends AppCompatActivity {
         super.onBackPressed();
         databaseReference.removeValue();
     }
-    private void sendPostToFCM(final ChatData chatData) {
-        firebaseDatabase.getReference("users")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        final ChatData chatData1 = dataSnapshot.getValue(ChatData.class);
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Toast.makeText(getApplicationContext(),"fcm",Toast.LENGTH_SHORT).show();
-                                    // FMC 메시지 생성 start
-                                    JSONObject root = new JSONObject();
-                                    JSONObject notification = new JSONObject();
-                                    notification.put("message",chatData1.getMessage());
-                                    notification.put("title", getString(R.string.app_name));
-                                    root.put("notification", notification);
-                                    root.put("to", chatData1.getToken());
-                                    // FMC 메시지 생성 end
 
-                                    URL Url = new URL(FCM_MESSAGE_URL);
-                                    HttpURLConnection conn = (HttpURLConnection) Url.openConnection();
-                                    conn.setRequestMethod("POST");
-                                    conn.setDoOutput(true);
-                                    conn.setDoInput(true);
-                                    conn.addRequestProperty("Authorization", "key=" + SERVER_KEY);
-                                    conn.setRequestProperty("Accept", "application/json");
-                                    conn.setRequestProperty("Content-type", "application/json");
-                                    OutputStream os = conn.getOutputStream();
-                                    os.write(root.toString().getBytes("utf-8"));
-                                    os.flush();
-                                    conn.getResponseCode();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }).start();
-                    }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+    private void SendFcmMessage(final String chat_message, final String token) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // FMC 메시지 생성 start
+                    JSONObject root = new JSONObject();
+                    JSONObject notification = new JSONObject();
+                    notification.put("body", chat_message);
+                    notification.put("title", "RandomChatting");
+                    root.put("notification", notification);
+                    root.put("to", token);
+                    // FMC 메시지 생성 end
 
-                    }
-                });
+                    URL Url = new URL(FCM_MESSAGE_URL);
+                    HttpURLConnection conn = (HttpURLConnection) Url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setDoOutput(true);
+                    conn.setDoInput(true);
+                    conn.addRequestProperty("Authorization", "key=" + SERVER_KEY);
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setRequestProperty("Content-type", "application/json");
+                    OutputStream os = conn.getOutputStream();
+                    os.write(root.toString().getBytes("utf-8"));
+                    os.flush();
+                    conn.getResponseCode();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
 
