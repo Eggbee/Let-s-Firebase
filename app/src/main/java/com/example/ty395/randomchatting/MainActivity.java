@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
                         chatData.setToken(token);
                         chatData.setMymessage(chat_message.getText().toString());
                 databaseReference.push().setValue(chatData);
-                SendFcmMessage(chatData.getMessage(),chatData.getToken());// 기본 database 하위 message라는 child에 chatData를 list로 만들기
+                SendFcmMessage(chatData.getMymessage(),chatData.getToken());// 기본 database 하위 message라는 child에 chatData를 list로 만들기
                 chat_message.setText("");
             }
         });

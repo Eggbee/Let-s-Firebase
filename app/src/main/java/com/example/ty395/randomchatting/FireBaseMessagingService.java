@@ -22,17 +22,14 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 
-
 import com.google.firebase.messaging.FirebaseMessagingService;
 
 import com.google.firebase.messaging.RemoteMessage;
 
 
-
 public class FireBaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
-
 
 
     @Override
@@ -52,10 +49,10 @@ public class FireBaseMessagingService extends FirebaseMessagingService {
             sendNotification(remoteMessage.getNotification().getBody());
         }
     }
+
     private void handleNow() {
         Log.d(TAG, "Short lived task is done.");
     }
-
 
 
     private void sendNotification(String messageBody) {
@@ -69,18 +66,16 @@ public class FireBaseMessagingService extends FirebaseMessagingService {
         NotificationCompat.Builder notificationBuilder =
 
                 new NotificationCompat.Builder(this, channelId)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("FCM Message")
+                        .setSmallIcon(R.drawable.icon)
+                        .setContentTitle("RandomChatting")
                         .setContentText(messageBody)
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
                         .setContentIntent(pendingIntent);
 
 
-
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
